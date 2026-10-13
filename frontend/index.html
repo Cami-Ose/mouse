@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mouse v35.0.1 - AI Chat</title>
+  <link rel="icon" type="image/svg+xml" href="./img/mouse-logo.svg">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mouse">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-web/1.520.0/lxgwwenkaigbscreen/result.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 顶栏 -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <button id="sidebar-toggle" class="icon-btn menu-btn" title="菜单">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="logo">
+          <img src="./img/mouse-logo.svg" alt="Mouse" class="logo-img">
+          Mouse
+        </span>
+      </div>
+      <div class="topbar-center">
+        <span id="current-view-title">聊天</span>
+      </div>
+      <div class="topbar-right">
+        <button id="btn-new-chat" class="btn btn-sm">+ 新建</button>
+        <button id="btn-import-gpt" class="btn btn-sm" title="导入 GPT 聊天记录">📥 导入</button>
+        <button id="btn-dashboard" class="icon-btn" title="控制台">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            <polygon points="16 2 17.5 4.5 20 5 18 7 18.5 9.5 16 8 13.5 9.5 14 7 12 5 14.5 4.5" stroke="none" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div id="main">
+      <!-- 侧栏 -->
+      <div id="sidebar-backdrop"></div>
+      <aside id="sidebar">
+        <!-- 鼠的纸片按钮 -->
+        <div id="sidebar-worldbook">
+          <div class="sidebar-section-header">
+            <span class="wb-header-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 22V13a7 7 0 0 1 14 0v9"/>
+                <path d="M3 22h18"/>
+                <path d="M11 10c-1 1-2 2-1 4" stroke-width="1.5"/>
+              </svg>
+            </span>
+            <span class="wb-header-text">鼠的纸片</span>
+            <span class="wb-header-count" id="wb-count">0</span>
+          </div>
+        </div>
+
+        <!-- 奶酪图书馆按钮 -->
+        <div id="sidebar-library" class="sidebar-section-header" onclick="switchView('library')" style="cursor:pointer;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:8px">
+          <span class="wb-header-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.519 20.008l16.481 -.008v-3.5a2 2 0 1 1 0 -4v-3.5h-16.722" />
+              <path d="M21 9l-9.385 -4.992c-2.512 .12 -4.758 1.42 -6.327 3.425c-1.423 1.82 -2.288 4.221 -2.288 6.854c0 2.117 .56 4.085 1.519 5.721" />
+              <path d="M15 13v.01" />
+              <path d="M8 13v.01" />
+              <path d="M11 16v.01" />
+            </svg>
+          </span>
+          <span class="wb-header-text">奶酪图书馆</span>
+        </div>
+
+
+        <!-- 对话搜索 -->
+        <div class="sidebar-search">
+          <input type="text" id="search-conv" placeholder="搜索对话…" oninput="Chat.renderConversations()">
+        </div>
+
+        <!-- 文件夹 -->
+        <div id="folder-list"></div>
+
+        <!-- 对话列表 -->
+        <div id="conv-list"></div>
+      </aside>
+
+      <!-- 内容区 -->
+      <main id="content">
+        <!-- 聊天视图 -->
+        <div id="view-chat" class="view active">
+          <div id="messages-container">
+            <div id="tool-status" class="tool-status" style="display:none"></div>
+          </div>
+          <div id="input-area">
+            <div id="img-preview" class="hidden"></div>
+            <div id="file-preview" class="hidden"></div>
+            <div id="wb-tag-bar" class="hidden">
+              <div id="wb-tag-list"></div>
+              <button id="wb-tag-add" type="button" class="wb-tag-add" title="手动添加世界书">＋</button>
+              <div id="wb-tag-picker" class="hidden"></div>
+            </div>
+            <div id="input-container">
+              <textarea id="message-input" rows="2" placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"></textarea>
+              <div id="input-actions">
+                <div class="left-actions">
+                  <button id="btn-upload-img" class="action-btn" title="上传图片">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </button>
+                  <input type="file" id="file-input" accept="image/*" style="display:none">
+                  <button id="btn-upload-file" class="action-btn" title="上传文件">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                  </button>
+                  <input type="file" id="file-input-file" style="display:none" multiple>
+                  <button id="btn-voice" class="action-btn" title="语音输入">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                      <line x1="12" y1="19" x2="12" y2="23"/>
+                      <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="right-actions">
+                  <button id="btn-send" class="btn btn-primary">发送</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 鼠的纸片视图 -->
+        <div id="view-worldbook" class="view">
+          <div class="view-header">
+            <h2>鼠的纸片</h2>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm" onclick="WorldBook.showMatchTest()">🔍 匹配测试</button>
+              <button id="btn-add-entry" class="btn btn-sm">+ 新建纸片</button>
+            </div>
+          </div>
+          <div id="entry-list"></div>
+        </div>
+
+        <!-- 鼠的纸片 - 匹配测试视图 -->
+        <div id="view-worldbook-matchtest" class="view">
+          <div class="view-header">
+            <h2>🔍 匹配测试</h2>
+            <button class="btn btn-sm" onclick="switchView('worldbook')">← 返回纸片</button>
+          </div>
+          <div class="matchtest-body">
+            <div class="matchtest-input-area">
+              <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:6px">输入测试文本，实时查看匹配结果：</label>
+              <textarea id="matchtest-input" placeholder="在此输入文本，下方实时显示匹配的世界书条目…&#10;&#10;精确命中 ✅ 会高亮显示&#10;可能关联 🔗 以较低透明度展示"></textarea>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">输入即匹配，无需点击按钮</div>
+            </div>
+            <div id="matchtest-results">
+              <div class="empty-state"><p>输入文本开始测试</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- API 线路视图 -->
+        <div id="view-providers" class="view">
+          <div class="view-header">
+            <h2>API 线路</h2>
+            <button id="btn-add-provider" class="btn btn-sm">+ 添加线路</button>
+          </div>
+          <div id="provider-list"></div>
+        </div>
+
+        <!-- 奶酪图书馆视图 -->
+        <div id="view-library" class="view">
+          <div class="view-header">
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin:-2px 6px 0 0"><path d="M4.519 20.008l16.481 -.008v-3.5a2 2 0 1 1 0 -4v-3.5h-16.722" /><path d="M21 9l-9.385 -4.992c-2.512 .12 -4.758 1.42 -6.327 3.425c-1.423 1.82 -2.288 4.221 -2.288 6.854c0 2.117 .56 4.085 1.519 5.721" /><path d="M15 13v.01" /><path d="M8 13v.01" /><path d="M11 16v.01" /></svg> 奶酪图书馆</h2>
+            <button id="btn-add-library" class="btn btn-sm" onclick="Library.showAddForm()">+ 新建奶酪</button>
+          </div>
+          <div class="library-body" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="library-search" style="padding:12px 20px;border-bottom:1px solid var(--border)">
+              <input type="text" id="library-search-input" placeholder="搜索奶酪…" oninput="Library.search(this.value)" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);outline:none;font-size:13px">
+            </div>
+            <div id="library-list" style="flex:1;overflow-y:auto;padding:8px 16px"></div>
+          </div>
+        </div>
+
+        <!-- GPT 导入视图 -->
+        <div id="view-import" class="view">
+          <div class="view-header">
+            <h2>📥 导入 GPT 聊天记录</h2>
+          </div>
+          <div class="import-body">
+            <div class="import-upload">
+              <button id="btn-import-pick" class="btn">选择 JSON 文件</button>
+              <span id="import-file-name" class="import-file-name"></span>
+            </div>
+            <div class="import-toolbar">
+              <span id="import-count">已选 0 / 0 个对话</span>
+              <button id="btn-import-execute" class="btn btn-primary" disabled>导入选中的对话</button>
+            </div>
+            <div id="import-list">
+              <div class="empty-state"><p>选择一个 GPT 导出 JSON 或 ZIP 文件</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 控制台视图 -->
+        <div id="view-dashboard" class="view">
+          <div class="view-header">
+            <h2>📊 控制台</h2>
+          </div>
+          <div id="dashboard-content" style="flex:1;overflow-y:auto;padding:20px 24px"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 全局隐藏文件选择器（必须放在 body 可见区域，否则 WebKit 无法触发 click） -->
+  <input type="file" id="import-file-input" accept=".json,.zip" style="display:none">
+
+  <!-- 弹窗 -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal-content">
+      <div id="modal-body"></div>
+      <div class="modal-footer">
+        <button id="modal-cancel" class="btn">取消</button>
+        <button id="modal-confirm" class="btn btn-primary">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/marked.min.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/providers.js"></script>
+  <script src="./js/worldbook.js"></script>
+  <script src="./js/chat.js"></script>
+  <script src="./js/import_gpt.js"></script>
+  <script src="./js/library.js"></script>
+  <script src="./js/dashboard.js"></script>
+  <script src="./js/app.js"></script>
+  <script>
+    // 先注销全部旧 SW，再重新注册（加时间戳避免缓存）
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        var regs = await navigator.serviceWorker.getRegistrations();
+        for (var r of regs) {
+          await r.unregister();
+          console.log('已注销 SW:', r.scope);
+        }
+        try {
+          var reg = await navigator.serviceWorker.register('./sw.js?v=' + Date.now());
+          console.log('新 SW 注册成功:', reg.scope);
+        } catch (err) {
+          console.warn('SW 注册失败:', err);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

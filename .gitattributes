@@ -1,0 +1,21 @@
+# 统一行尾，别再让 git 每次都说 LF 会变 CRLF
+* text=auto eol=lf
+
+# 这些是二进制，别当文本处理（也别让 git 猜 diff）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.icns binary
+*.woff2 binary
+*.ttf binary
+*.db binary
+
+# 生成物 / 锁文件：默认折叠在 diff 里
+package-lock.json linguist-generated=true
+src-tauri/Cargo.lock linguist-generated=true
+frontend/js/marked.min.js linguist-generated=true
+
+# 语言统计：别让前端那堆 CSS/字体把仓库算成别的项目
+frontend/fonts/* linguist-vendored
+frontend/js/marked.min.js linguist-vendored

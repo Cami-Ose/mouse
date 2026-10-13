@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# 运行时数据
+data/mouse.db
+data/mouse.db-*
+data/mouse.db-wal
+data/mouse.db-shm
+frontend/uploads/*
+!frontend/uploads/.gitkeep
+
+# 日志
+*.log
+
+# Tauri / Node
+node_modules/
+src-tauri/target/
+src-tauri/gen/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
